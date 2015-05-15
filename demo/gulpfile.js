@@ -6,7 +6,7 @@ var
 
 gulp.task('scripts', function () {
 
-	gulp.src('main.js')
+	gulp.src(['first.js', 'second.js'])
 		.pipe( include({
 			includePaths: [
 				path.resolve('./')+'/libraries',

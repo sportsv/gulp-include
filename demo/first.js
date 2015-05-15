@@ -8,4 +8,4 @@
 
 //= include libraries/**/library-xy.js
 //= include libraries/**/library-yz.js
-console.log('main.js');
+console.log('first.js');
