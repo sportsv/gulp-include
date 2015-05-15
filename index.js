@@ -14,10 +14,9 @@ var requiredFiles = {},
 
 module.exports = function (params) {
     var params = params || {};
-    requiredFiles = {};
-    extensions = [];
-    includePaths = [],
-    filesDone = [];
+    requiredFiles = {},
+    extensions = [],
+    includePaths = [];
 
     if (params.extensions) {
         extensions = typeof params.extensions === 'string' ? [params.extensions] : params.extensions;
@@ -36,6 +35,7 @@ module.exports = function (params) {
         }
 
         if (file.isBuffer()) {
+            filesDone = [];
             var newText = expand(String(file.contents), file.path);
             file.contents = new Buffer(newText);
         }
