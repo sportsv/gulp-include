@@ -180,9 +180,9 @@ function _internalGlob(thisGlob, filePath) {
         folderPathAdd = '',
         filesAdd = [];
     for (var i = includePaths.length - 1; i >= 0; i--) {
-        thisGlobAdd = path.relative(path.dirname(filePath), includePaths[i])+thisGlob,
+        thisGlobAdd = path.relative(path.dirname(filePath), includePaths[i]),
         folderPathAdd = path.dirname(filePath),
-            fullPathAdd = path.join(folderPathAdd, thisGlobAdd.replace(/['"]/g, ''));
+            fullPathAdd = path.join(folderPathAdd, thisGlobAdd.replace(/['"]/g, ''), thisGlob);
 
         filesAdd = glob.sync(fullPathAdd, {
             mark: true
