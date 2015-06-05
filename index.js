@@ -5,7 +5,7 @@ var fs = require('fs'),
     glob = require('glob');
 
 
-var DIRECTIVE_REGEX = /^[\/\s#]*?=\s*?((?:require|include)(?:_tree|_directory)?)\s+(.*$)/mg;
+var DIRECTIVE_REGEX = /^[\/\s#*]*?=\s*?((?:require|include)(?:_tree|_directory)?)\s+(.*$)/mg;
 
 var requiredFiles = {},
     extensions = [],
@@ -58,7 +58,8 @@ function expand(fileContents, filePath) {
         matches.push(regexMatch);
     }
 
-    for (var i = 0; i < matches.length; i++) {
+    i = matches.length;
+    while (i--) {
         var match = matches[i],
             original = match[0],
             directiveType = match[1],
@@ -74,37 +75,33 @@ function expand(fileContents, filePath) {
             thisMatchText += original + "\n";
         }
 
-        returnTextBefore = returnText;
         for (j = 0; j < files.length; j++) {
-            if ( filesDone.indexOf(files[j])<0 ) {
-                filesDone.push(files[j]);
+            if (requiredFiles[files[j]]) { continue; }
+            fileName = files[j];
+            newMatchText = expand(String(fs.readFileSync(fileName)), fileName);
 
-                fileName = files[j];
-                newMatchText = expand(String(fs.readFileSync(fileName)), fileName);
+            //Try to retain the same indent level from the original include line
+            whitespace = original.match(/^\s+/);
+            if (whitespace) {
+                //Discard newlines
+                whitespace = whitespace[0].replace("\n", "");
 
-                //Try to retain the same indent level from the original include line
-                whitespace = original.match(/^\s+/);
+                //Is there some whitespace left?
                 if (whitespace) {
-                    //Discard newlines
-                    whitespace = whitespace[0].replace("\n", "");
-
-                    //Is there some whitespace left?
-                    if (whitespace) {
-                        newMatchText = addLeadingWhitespace(whitespace, newMatchText);
-                    }
+                    newMatchText = addLeadingWhitespace(whitespace, newMatchText);
                 }
+            }
 
-                thisMatchText += newMatchText + "\n";
+            thisMatchText += newMatchText + "\n";
 
-                if (directiveType.indexOf('require') !== -1 || directiveType.indexOf('include') !== -1) {
-                    requiredFiles[fileName] = true;
-                }
-                returnText = returnText.replace(match[0], thisMatchText);
-            }else{
-                returnText = returnText.replace(match[0], '/* already included: '+match[2].replace(/\//g, '-')+' */');
+            if (directiveType.indexOf('require') !== -1 || directiveType.indexOf('include') !== -1) {
+                requiredFiles[fileName] = true;
             }
         }
 
+        thisMatchText = thisMatchText || original;
+
+        returnText = replaceStringByIndices(returnText, start, end, thisMatchText);
     }
 
     return returnText ? returnText : fileContents;
