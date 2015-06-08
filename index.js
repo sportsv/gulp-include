@@ -72,7 +72,8 @@ function expand(fileContents, filePath) {
             whitespace = null;
 
         if (directiveType.indexOf("_tree") !== -1 || directiveType.indexOf("_directory") !== -1) {
-            thisMatchText += original + "\n";
+            // prevent original content start with "*= require "
+            thisMatchText += original.replace(/(^\s*\*\=.*)/, '/* ' +'$1'+' */') + "\n";
         }
 
         for (j = 0; j < files.length; j++) {
@@ -99,8 +100,16 @@ function expand(fileContents, filePath) {
             }
         }
 
-        thisMatchText = thisMatchText || original;
+        // prevent original content start with "*= require "
+        thisMatchText = thisMatchText || original.replace(/(^\s*\*\=.*)/, '/* ' +'$1'+' */');
 
+        if (original.match(/\/\*[\s\S]*?/)) {// first declartion of block comments
+            thisMatchText += '/*'; // close out comments
+        } else if (original.match(/^\s*\*\=/)) { // include decalartion is part of block comments
+            thisMatchText = '*/' + thisMatchText + '/*';
+        }
+
+        // replace "original require" declartion comment with glob contents
         returnText = replaceStringByIndices(returnText, start, end, thisMatchText);
     }
 
