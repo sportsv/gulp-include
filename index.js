@@ -77,7 +77,6 @@ function expand(fileContents, filePath) {
         }
 
         for (j = 0; j < files.length; j++) {
-            if (requiredFiles[files[j]]) { continue; }
             fileName = files[j];
             newMatchText = expand(String(fs.readFileSync(fileName)), fileName);
 
